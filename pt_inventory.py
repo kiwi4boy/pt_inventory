@@ -1,25 +1,27 @@
+from getpass import getpass
 from json import loads
-import re
+from re import findall
 
 def parse_orig_str(s: str):
+    extract_inventory = """\\\\"inventory\\\\"\\s*:\\s*\\[.*?\\]"""
     texts = [
-        t for t in re.findall("""\\"inventory\\":\[.*?\]""", s)
+        t for t in findall(extract_inventory, s)
         if '[]' not in t
     ]
     texts = texts[0].replace('\\"', '"')
     return loads('{' + texts + '}')['inventory']
 
 
-def extract_pt_inventory(pt_inv):
-    return {
-        pt_item['tier']['name']: pt_item['availableCount']
+def format_pt_inventory(pt_inv):
+    return ', '.join(
+        f"{pt_item['tier']['name']}: {pt_item['availableCount']}"
         for pt_item in pt_inv
-    }
+    )
 
 
 
-s = input('Enter inventory line: ')
+s = getpass('Enter inventory line: ')
 s = parse_orig_str(s)
-s = extract_pt_inventory(s)
+s = format_pt_inventory(s)
 
 print(s)
