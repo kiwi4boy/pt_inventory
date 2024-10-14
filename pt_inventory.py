@@ -1,16 +1,13 @@
 from json import loads
+import re
 
-def parse_orig_str(s: str, head='"text": "', tail='\\n",'):
-    return (
-        s.strip()
-        .removeprefix(head)
-        .removesuffix(tail)
-        .replace('\\"', '"')
-    )
-
-
-def load_pt_inventory(s):
-    return loads(s)['data']['me']['trainingInfo']['personalTrainingInfo']['inventory']
+def parse_orig_str(s: str):
+    texts = [
+        t for t in re.findall("""\\"inventory\\":\[.*?\]""", s)
+        if '[]' not in t
+    ]
+    texts = texts[0].replace('\\"', '"')
+    return loads('{' + texts + '}')['inventory']
 
 
 def extract_pt_inventory(pt_inv):
@@ -20,9 +17,9 @@ def extract_pt_inventory(pt_inv):
     }
 
 
+
 s = input('Enter inventory line: ')
 s = parse_orig_str(s)
-s = load_pt_inventory(s)
 s = extract_pt_inventory(s)
 
 print(s)
